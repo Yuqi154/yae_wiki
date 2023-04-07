@@ -1,6 +1,6 @@
 name = "yae-wiki"
 main = "src/index.ts"
-compatibility_date = "2023-04-07"
+compatibility_date = "2023-04-08"
 
 # id (for production) is a required field, but you can set it to the same as
 # preview_id until you need to separate them
