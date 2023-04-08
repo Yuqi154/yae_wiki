@@ -24,6 +24,10 @@ app.get('/login', async (ctx) => {
   return ctx.html(login.showpage());
 })
 
+app.get('/signup', async (ctx) => {
+  return ctx.html(login.signuppage());
+})
+
 app.get('/home', async (ctx) => {
   return ctx.html(wikiPage.showHome());
 })
