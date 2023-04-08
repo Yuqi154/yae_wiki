@@ -1,11 +1,13 @@
 # Yae Wiki
 
 A Wiki build on Cloudflare Workers with Workers KV
+
 基于Cloudflare Workers 和 Workers KV 构建的 Wiki
 
 ## Setup 安装
 
 You need npm and a Cloudflare account (free).
+
 您将需要安装node npm和Cloudflare帐户（免费）。
 
 1. Run `npm install`.
@@ -17,6 +19,11 @@ You need npm and a Cloudflare account (free).
    您需要一个cloudflare帐户，注册在
 <https://dash.cloudflare.com/sign-up/workers>
 
+1. install wrangler
+
+   安装wrangler
+
+   `npm install @cloudflare/wrangler -g`
 
 1. login to cloudflare
 
