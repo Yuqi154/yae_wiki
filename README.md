@@ -1,39 +1,52 @@
 # Yae Wiki
 
-A stupid experiment building a Wiki on Cloudflare Workers with Workers KV for
-persistence.
+A Wiki build on Cloudflare Workers with Workers KV
+基于Cloudflare Workers 和 Workers KV 构建的 Wiki
 
-Durable Objects would probably be a better idea, and enable simple page edit
-history.
+## Setup 安装
 
-## Setup
-
-You will need npm and a Cloudflare account (free).
+You need npm and a Cloudflare account (free).
+您将需要安装node npm和Cloudflare帐户（免费）。
 
 1. Run `npm install`.
 
-1. You'll need a Workers account, register at
-https://dash.cloudflare.com/sign-up/workers
+   运行`npm install`
 
-1. Create an API token from the "Edit Cloudflare Workers" template on
-https://dash.cloudflare.com/profile/api-tokens
+1. You need a cloudflare account, register at
 
-1. Export `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` in the shell you
-use `wrangler`
+   您需要一个cloudflare帐户，注册在
+<https://dash.cloudflare.com/sign-up/workers>
+
+
+1. login to cloudflare
+
+   登录到cloudflare
+
+   `wrangler login`
 
 1. Create a PAGES , a PAGE_INDEX KV and an USER namespace through wrangler:
-https://developers.cloudflare.com/workers/wrangler/cli-wrangler/commands/#kv
+
+   通过wrangler创建一个PAGES，一个PAGE_INDEX KV和一个USER命名空间：
+
+   `wrangler kv:namespace create "PAGES"`
+
+   `wrangler kv:namespace create "PAGE_INDEX"`
+
+   `wrangler kv:namespace create "USER"`
 
 1. Edit [wrangler.toml](./wrangler.toml) to insert your KV space ids
 
-## Running
+    编辑[wrangler.toml](./wrangler.toml)并插入您的KV空间ID
+
+## Running 开发
 
 `wrangler dev`
 
-## Publishing
+## Publishing 发布
 
-`wrangler publish` will make your worker public, remember to set the
-basic auth secrets.
+`wrangler publish` will make your worker public
+
+`wrangler publish` 将使您的worker公开
 
 ## License
 
@@ -44,4 +57,8 @@ MIT, see [LICENSE](./LICENSE).
 ## TODO
 
 - [x] user auth
-- [ ] change history
+- [ ] user profile
+- [ ] user settings
+- [ ] image upload
+- [ ] email verification
+- [ ] edit history
