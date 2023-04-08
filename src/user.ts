@@ -1,6 +1,6 @@
 //an user script
 //导入加密模块
-import * as crypto from 'crypto-js';
+import {SHA256} from 'crypto-js';
 
 declare const USERS: KVNamespace;
 
@@ -12,7 +12,7 @@ async function checkUser(username:string,password:string):Promise<string>{
         return "No such user";
     }else{
         //如果用户存在，将用户输入的密码加密后与KV中的密码比较
-        if (userPassword == crypto.SHA256(password).toString()){
+        if (userPassword == SHA256(password).toString()){
             return "success";
         }else{
             return "Wrong password";
@@ -22,13 +22,10 @@ async function checkUser(username:string,password:string):Promise<string>{
 
 async function saveUser(username:string,password:string){
     //将用户名和密码加密后存入KV
-    USERS.put(username, crypto.SHA256(password).toString());
+    USERS.put(username, SHA256(password).toString());
     return null;
 }
 
-function encoder(username:string):string{
-    return crypto.SHA256(username).toString();
-}
 
 
 function getCookie(name:string,cookieStr: string): string {
@@ -40,6 +37,7 @@ function getCookie(name:string,cookieStr: string): string {
         }
     }
     return '';
+    //获取cookie
 }
 
-export default {checkUser,saveUser,encoder,getCookie};
+export default {checkUser,saveUser,getCookie};

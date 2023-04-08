@@ -40,7 +40,7 @@ function showHelp(): string {
 
 通过访问它们来创建新页面，也许可以先创建一个指向它们的链接。
 `);
-    return (render('Help', '<h2 class="text-primary">帮助</h2>' + html));
+    return (render('八重wiki-帮助', '<h2 class="text-primary">帮助</h2>' + html));
 }
 
 function showHome(): string {
@@ -49,7 +49,7 @@ function showHome(): string {
 ###在编辑页面前，请先[登录](/_login)
 
 `);
-    return (render('主页', '<h2 class="text-primary">主页</h2>' + html));
+    return (render('八重wiki-主页', '<h2 class="text-primary">主页</h2>' + html));
 }
 
 export default { save, show, edit, list, get, showHelp, showHome };

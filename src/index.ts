@@ -20,7 +20,7 @@ app.get('/help', async (ctx) => {
   return ctx.html(wikiPage.showHelp());
 })
 
-app.get('/_login', async (ctx) => {
+app.get('/login', async (ctx) => {
   return ctx.html(login.showpage());
 })
 
@@ -51,25 +51,41 @@ app.get('/:pageName', async (ctx) => {
   return ctx.html(await html);
 });
 
-app.post('/_login', bodyParse(), async (ctx) => {
-  let html = "";
+app.post('/login', bodyParse(), async (ctx) => {
+  let htmlstr = "";
   const { username, password } = ctx.req.parsedBody;
 
   const result = await login.login(username, password);
   if (result == "success") {
-    html =  render('登录', '<h5 class="text-primary">登录成功</h5>');
+    htmlstr =  '<h5 class="text-primary">登录成功</h5>';
   } else if (result == "No such user") {
-    user.saveUser(username, password);
-    html =  render('登录', '<h5 class="text-primary">注册成功</h5>');
-  } else {
-    html =  render('登录', '<h5 class="text-primary">密码错误</h5>');
-    return ctx.html(html,401);
+    htmlstr = `<h5 class="text-primary">用户名或密码错误</h5>`;
+    return ctx.html(render('八重wiki-登录',htmlstr),401);
   }
   let headers={'Set-Cookie':'username='+username+',password='+password};
-  return ctx.html(html,200,headers);
+  return ctx.html(render('八重wiki-登录', htmlstr),200,headers);
 
 });
 
+app.post('/signup', bodyParse(), async (ctx) => {
+  let htmlstr = "";
+  const { username, password } = ctx.req.parsedBody;
+
+  const result = await login.login(username, password);
+  if (result == "success") {
+    htmlstr =  '<h5 class="text-primary">用户名已注册</h5>';
+    return ctx.html(render('八重wiki-注册', htmlstr),401);
+  } else if (result == "No such user") {
+    user.saveUser(username, password);
+    htmlstr =  '<h5 class="text-primary">注册成功</h5>';
+  } else {
+    htmlstr =  '<h5 class="text-primary">用户名已注册</h5>';
+    return ctx.html(render('八重wiki-注册', htmlstr),401);
+  }
+  let headers={'Set-Cookie':'username='+username+',password='+password};
+  return ctx.html(render('八重wiki-注册', htmlstr),200,headers);
+
+});
 
 app.post('/:pageName',bodyParse(), async (ctx) => {
   const pageName =   decodeURIComponent(ctx.req.param('pageName'));
