@@ -48,10 +48,6 @@ You need npm and a Cloudflare account (free).
 
 `wrangler publish` 将使您的worker公开
 
-## License
-
-MIT, see [LICENSE](./LICENSE).
-
 ## Notes
 
 ## TODO
