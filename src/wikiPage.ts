@@ -46,7 +46,7 @@ function showHelp(): string {
 function showHome(): string {
     const html = markdown(`
 ###欢迎来到八重wiki
-###在编辑页面前，请先[登录](/_login)
+###在编辑页面前，请先[登录](/login)
 
 `);
     return (render('八重wiki-主页', '<h2 class="text-primary">主页</h2>' + html));
