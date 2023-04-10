@@ -6,6 +6,7 @@ import wikiPage from './wikiPage';
 import login from './login';
 import wikiSearch, { searchWords } from './wikiSearch';
 import user from './user';
+import { config } from './config';
 
 
 
@@ -29,23 +30,30 @@ app.get('/signup', async (ctx) => {
 })
 
 app.get('/home', async (ctx) => {
-  return ctx.html(wikiPage.showHome());
+  const cookiestr = ctx.req.headers.get("cookie")?.toString();
+  let login = 1;
+  if (cookiestr==null){
+    login = 0;
+  }else if ((cookiestr.indexOf("username")==-1)&&(cookiestr.indexOf("password")==-1)){
+    login = 0;
+  }
+  return ctx.html(wikiPage.showHome(login));
 })
 
 app.get('/index', async (ctx) => {
   const pageNames = await wikiPage.list();
   const htmlList = listGroup(pageNames.map((name) => link(name)));
-  return ctx.html(render('所有内容', `<h2 class="text-primary">所有内容</h2>${htmlList}`));
+  return ctx.html(render(config.wikiname+'-所有内容', `<h2 class="text-primary">所有内容</h2>${htmlList}`));
 })
 
 app.get('/search', async (ctx) => {
   const query = searchWords(ctx.req.query('q'));
   const hits = await wikiSearch.find(query);
-  let html = '<p>no hits :(</p>'
+  let html = '<p>没有匹配条目 :(</p>'
   if (0 < hits.length) {
     html = listGroup(hits.map((pageName) => link(pageName)));
   }
-  return ctx.html(render('搜索结果', `<h2 class="text-primary">搜索结果 (${query})</h2>${html}`));
+  return ctx.html(render(config.wikiname+'-搜索结果', `<h2 class="text-primary">搜索结果 (${query})</h2>${html}`));
 })
 
 app.get('/:pageName', async (ctx) => {
@@ -58,36 +66,36 @@ app.get('/:pageName', async (ctx) => {
 app.post('/login', bodyParse(), async (ctx) => {
   let htmlstr = "";
   const { username, password } = ctx.req.parsedBody;
-
+  const loginhead=config.wikiname+'-登录';
   const result = await login.login(username, password);
   if (result == "success") {
     htmlstr =  '<h5 class="text-primary">登录成功</h5>';
   } else if (result == "No such user") {
     htmlstr = `<h5 class="text-primary">用户名或密码错误</h5>`;
-    return ctx.html(render('八重wiki-登录',htmlstr),401);
+    return ctx.html(render(loginhead,htmlstr),401);
   }
   let headers={'Set-Cookie':'username='+username+',password='+password};
-  return ctx.html(render('八重wiki-登录', htmlstr),200,headers);
+  return ctx.html(render(loginhead, htmlstr),200,headers);
 
 });
 
 app.post('/signup', bodyParse(), async (ctx) => {
   let htmlstr = "";
   const { username, password } = ctx.req.parsedBody;
-
+  const signuphead=config.wikiname+'-注册';
   const result = await login.login(username, password);
   if (result == "success") {
     htmlstr =  '<h5 class="text-primary">用户名已注册</h5>';
-    return ctx.html(render('八重wiki-注册', htmlstr),401);
+    return ctx.html(render(signuphead, htmlstr),401);
   } else if (result == "No such user") {
     user.saveUser(username, password);
     htmlstr =  '<h5 class="text-primary">注册成功</h5>';
   } else {
     htmlstr =  '<h5 class="text-primary">用户名已注册</h5>';
-    return ctx.html(render('八重wiki-注册', htmlstr),401);
+    return ctx.html(render(signuphead, htmlstr),401);
   }
   let headers={'Set-Cookie':'username='+username+',password='+password};
-  return ctx.html(render('八重wiki-注册', htmlstr),200,headers);
+  return ctx.html(render(signuphead, htmlstr),200,headers);
 
 });
 

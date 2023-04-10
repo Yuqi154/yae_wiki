@@ -1,24 +1,35 @@
 import showdown from 'showdown';
 
 import { render } from './html';
+import { config } from './config';
 
 // see wrangler.toml
 declare const PAGES: KVNamespace;
 
 async function save(name: string, content: string, username: string): Promise<string> {
-    content += "\n上次编辑：" + datenow() + " 用户：" + username
-    await PAGES.put(name, content);
-    return render(name, showHTML(name, content), name);
+    await PAGES.put(name, "" + content + "`,`" + datenow() + "`,`" + username + "");
+    return render(name, showHTML(name, content, username, datenow()), name);
 }
 
 async function edit(name: string): Promise<string> {
     const { content } = await get(name);
-    return render(name, editHTML(name, content), name);
+    let contentl = content.split("`,`");
+    return render(name, editHTML(name, contentl[0]), name);
 }
 
 async function show(name: string): Promise<string> {
     const content = await PAGES.get(name);
-    const html = (content === null) ? editHTML(name, '') : showHTML(name, content);
+    if (content === null) {
+        return render(name, editHTML(name, ''), name);
+    }
+    //将content分割成三部分，分别是内容，时间，用户
+    let html = "";
+    try {
+        let contentl = content.split("`,`");
+        html = (content === null) ? editHTML(name, '') : showHTML(name, contentl[0], contentl[1], contentl[2]);
+    }catch{
+        html = (content === null) ? editHTML(name, '') : showHTML(name, content, "", "");
+    }
     return render(name, html, name)
 }
 
@@ -40,16 +51,23 @@ function showHelp(): string {
 
 通过访问它们来创建新页面，也许可以先创建一个指向它们的链接。
 `);
-    return (render('八重wiki-帮助', '<h2 class="text-primary">帮助</h2>' + html));
+    return (render(config.wikiname + '-帮助', '<h2 class="text-primary">帮助</h2>' + html));
 }
 
-function showHome(): string {
-    const html = markdown(`
+function showHome(login: GLint64): string {
+    let html = "";
+    if (login == 1) {
+        html = markdown(`
+###欢迎来到八重wiki
+###您已经登录，可以编辑页面
+`);
+    } else {
+        html = markdown(`
 ###欢迎来到八重wiki
 ###在编辑页面前，请先[登录](/login)
-
 `);
-    return (render('八重wiki-主页', '<h2 class="text-primary">主页</h2>' + html));
+    }
+    return (render(config.wikiname, '<h2 class="text-primary">主页</h2>' + html));
 }
 
 export default { save, show, edit, list, get, showHelp, showHome };
@@ -62,13 +80,22 @@ function wiki2md(code: string): string {
     return code.replace(/\[\[([^\]]*)\]\]/ig, '[$1]($1)')
 }
 
-function showHTML(name: string, content: string): string {
-    return `
+function showHTML(name: string, content: string, user: string, time: string): string {
+    try {
+        return `
 <h1 class="text-primary">${name}</h1>
 ${markdown(content)}
-`;
-}
+<p>上次编辑：${time} 用户：${user}</p>
 
+`
+    } catch (e) {
+        return `
+<h1 class="text-primary">${name}</h1>
+<p>内容解析错误</p>
+`
+            ;//添加上次编辑时间和用户
+    }
+}
 function editHTML(name: string, content: string): string {
     return `
 <h1 class="text-primary">${name} <small class="text-muted">(正在编辑)</small></h1>
