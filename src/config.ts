@@ -1,5 +1,7 @@
 const wikiname="八重wiki";
+const allowregister=true;
 
 // Path: src\config.ts
 
-export const config = {wikiname};
+export const common = {wikiname};
+export const loginc = {allowregister};

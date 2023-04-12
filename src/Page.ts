@@ -1,7 +1,7 @@
 import showdown from 'showdown';
 
 import { render } from './html';
-import { config } from './config';
+import { common } from './config';
 
 // see wrangler.toml
 declare const PAGES: KVNamespace;
@@ -51,14 +51,14 @@ function showHelp(): string {
 
 通过访问它们来创建新页面，也许可以先创建一个指向它们的链接。
 `);
-    return (render(config.wikiname + '-帮助', '<h2 class="text-primary">帮助</h2>' + html));
+    return (render(common.wikiname + '-帮助', '<h2 class="text-primary">帮助</h2>' + html));
 }
 
-function showHome(login: GLint64): string {
+function showHome(login: GLint64,user:string): string {
     let html = "";
     if (login == 1) {
         html = markdown(`
-###欢迎来到八重wiki
+### ${user},欢迎来到八重wiki
 ###您已经登录，可以编辑页面
 `);
     } else {
@@ -67,7 +67,7 @@ function showHome(login: GLint64): string {
 ###在编辑页面前，请先[登录](/login)
 `);
     }
-    return (render(config.wikiname, '<h2 class="text-primary">主页</h2>' + html));
+    return (render(common.wikiname, '<h2 class="text-primary">主页</h2>' + html));
 }
 
 export default { save, show, edit, list, get, showHelp, showHome };
