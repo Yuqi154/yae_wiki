@@ -60,6 +60,7 @@ You need npm and a Cloudflare account (free).
 ## TODO
 
 - [x] user auth
+- [x] home page
 - [ ] user profile
 - [ ] user settings
 - [ ] image upload
