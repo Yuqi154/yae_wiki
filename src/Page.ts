@@ -7,7 +7,14 @@ import { common } from './config';
 declare const PAGES: KVNamespace;
 
 async function save(name: string, content: string, username: string): Promise<string> {
-    await PAGES.put(name, "" + content + "`,`" + datenow() + "`,`" + username + "");
+    //将内容，时间，用户合并成一个json字符串
+    //创建json对象
+    let contentstr = content + "`,`" + datenow() + "`,`" + username;
+    await PAGES.put(name, contentstr);
+
+    
+    
+    
     return render(name, showHTML(name, content, username, datenow()), name);
 }
 

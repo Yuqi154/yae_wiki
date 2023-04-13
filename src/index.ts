@@ -76,12 +76,12 @@ app.post('/login', bodyParse(), async (ctx) => {
   const loginhead=common.wikiname+'-登录';
   const result = await login.login(username, password);
   if (result == "success") {
-    htmlstr =  '<h5 class="text-primary">登录成功</h5>';
+    htmlstr =  '<h5 class="text-primary">登录成功</h5><a href="/home">返回首页</a>';
   } else if (result == "No such user") {
-    htmlstr = `<h5 class="text-primary">用户名或密码错误</h5>`;
+    htmlstr = `<h5 class="text-primary">用户名或密码错误</h5><a href="/login">返回</a>`;
     return ctx.html(render(loginhead,htmlstr),401);
   }
-  let headers={'Set-Cookie':'username='+username+',password='+password};
+  let headers={'Set-Cookie':'username="'+username+'",password="'+password+'"'};
   return ctx.html(render(loginhead, htmlstr),200,headers);
 
 });
@@ -92,13 +92,13 @@ app.post('/signup', bodyParse(), async (ctx) => {
   const signuphead=common.wikiname+'-注册';
   const result = await login.login(username, password);
   if (result == "success") {
-    htmlstr =  '<h5 class="text-primary">用户名已注册</h5>';
+    htmlstr =  '<h5 class="text-primary">用户名已注册</h5><a href="/signup">返回</a>';
     return ctx.html(render(signuphead, htmlstr),401);
   } else if (result == "No such user") {
     user.saveUser(username, password);
-    htmlstr =  '<h5 class="text-primary">注册成功</h5>';
+    htmlstr =  '<h5 class="text-primary">注册成功</h5><a href="/home">返回首页</a>';
   } else {
-    htmlstr =  '<h5 class="text-primary">用户名已注册</h5>';
+    htmlstr =  '<h5 class="text-primary">用户名已注册</h5><a href="/signup">返回</a>';
     return ctx.html(render(signuphead, htmlstr),401);
   }
   let headers={'Set-Cookie':'username='+username+',password='+password};
