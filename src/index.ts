@@ -166,6 +166,7 @@ app.post('/user/login', bodyParse(), async (ctx) => {
   if (auth == null) {
     return ctx.html(await render(loginhead, htmlstr), 401);
   } else {
+    user.updatelogintime(auth);
     return ctx.html(await render(loginhead, htmlstr, auth), 200, headers);
   }
 

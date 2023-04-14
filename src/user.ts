@@ -146,7 +146,17 @@ async function showUser(userhash:string){
 
 }
 
-
+async function updatelogintime(userhash:string){
+    //更新登录时间
+    const userjson = await USERS.get(userhash);
+    if (userjson == null) {
+        return null;
+    }
+    let user= JSON.parse(userjson);
+    user.userlastlogin = new Date().toString();
+    USERS.put(userhash,JSON.stringify(userjson));
+    return null;
+}
 
 
 
@@ -191,4 +201,4 @@ function createuserjson(){
     return userjson;
 }
 
-export default {checkUser,saveUser,getCookie,checkauth,getuserhash,getusername,showUser};
+export default {checkUser,saveUser,getCookie,checkauth,getuserhash,getusername,showUser,updatelogintime};
