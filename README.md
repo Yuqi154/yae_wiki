@@ -16,14 +16,9 @@ You need npm and a Cloudflare account (free).
 
 1. You need a cloudflare account, register at
 
-   您需要一个cloudflare帐户，注册在
+   您需要一个cloudflare帐户，
 <https://dash.cloudflare.com/sign-up/workers>
 
-1. install wrangler
-
-   安装wrangler
-
-   `npm install @cloudflare/wrangler -g`
 
 1. login to cloudflare
 
@@ -39,7 +34,9 @@ You need npm and a Cloudflare account (free).
 
    `wrangler kv:namespace create "PAGE_INDEX"`
 
-   `wrangler kv:namespace create "USER"`
+   `wrangler kv:namespace create "USERS"`
+
+   `wrangler kv:namespace create "USERS_INDEX"`
 
 1. Edit [wrangler.toml](./wrangler.toml) to insert your KV space ids
 
