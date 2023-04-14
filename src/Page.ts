@@ -2,42 +2,44 @@ import showdown from 'showdown';
 
 import { render } from './html';
 import { common } from './config';
+import  utils  from './utils';
+import user from './user';
 
 // see wrangler.toml
 declare const PAGES: KVNamespace;
 
-async function save(name: string, content: string, username: string): Promise<string> {
+async function save(name: string, content: string, auth: string): Promise<string> {
     //将内容，时间，用户合并成一个json字符串
-    //创建json对象
-    let contentstr = content + "`,`" + datenow() + "`,`" + username;
-    await PAGES.put(name, contentstr);
-
+    let username = await user.getusername(auth);
+    let contentjson = utils.createcontentjson();
+    contentjson.content = content;
+    contentjson.contenttime = utils.datenow(new Date);
+    contentjson.contentuser = auth;
+    await PAGES.put(name, JSON.stringify(contentjson));
     
-    
-    
-    return render(name, showHTML(name, content, username, datenow()), name);
+    return render(name, showHTML(name, content, username, utils.datenow(new Date)), name);
 }
 
-async function edit(name: string): Promise<string> {
+async function edit(name: string,auth?:string): Promise<string> {
     const { content } = await get(name);
-    let contentl = content.split("`,`");
-    return render(name, editHTML(name, contentl[0]), name);
+    return render(name, editHTML(name, content),auth, name);
 }
 
-async function show(name: string): Promise<string> {
+async function show(name: string,auth?:string): Promise<string> {
     const content = await PAGES.get(name);
     if (content === null) {
-        return render(name, editHTML(name, ''), name);
+        return render(name, editHTML(name, ''),auth, name);
     }
-    //将content分割成三部分，分别是内容，时间，用户
+    //解析json字符串
+    let contentjson = JSON.parse(content);
     let html = "";
     try {
-        let contentl = content.split("`,`");
-        html = (content === null) ? editHTML(name, '') : showHTML(name, contentl[0], contentl[1], contentl[2]);
+        let username= await user.getusername(contentjson.contentuser);
+        html = showHTML(name, contentjson.content, username, contentjson.contenttime);
     }catch{
-        html = (content === null) ? editHTML(name, '') : showHTML(name, content, "", "");
+        return render(name, editHTML(name, ''),auth, name);
     }
-    return render(name, html, name)
+    return render(name, html,auth, name)
 }
 
 async function list(): Promise<string[]> {
@@ -45,11 +47,15 @@ async function list(): Promise<string[]> {
 }
 
 async function get(name: string): Promise<{ name: string, content: string }> {
-    const content = (await PAGES.get(name)) || '';
+    const contentjson = (await PAGES.get(name));
+    if (contentjson === null) {
+        return { name, content: '' };
+    }
+    let content = JSON.parse(contentjson).content;
     return { name, content };
 }
 
-function showHelp(): string {
+async function showHelp(auth?:string): Promise<string> {
     const html = markdown(`
 你好，这是一个[[wiki]]！
 
@@ -58,26 +64,25 @@ function showHelp(): string {
 
 通过访问它们来创建新页面，也许可以先创建一个指向它们的链接。
 `);
-    return (render(common.wikiname + '-帮助', '<h2 class="text-primary">帮助</h2>' + html));
+    return (await render(common.wikiname + ' - 帮助', '<h2 class="text-primary">帮助</h2>' + html,auth));
 }
 
-function showHome(login: GLint64,user:string): string {
+async function showHome(login: boolean,user:string,auth?:string): Promise<string> {
     let html = "";
-    if (login == 1) {
+    if (login == true) {
         html = markdown(`
 ### ${user},欢迎来到八重wiki
-###您已经登录，可以编辑页面
+###您已经登录，可以编辑和[创建页面](/control/createpage)
 `);
     } else {
         html = markdown(`
 ###欢迎来到八重wiki
-###在编辑页面前，请先[登录](/login)
 `);
     }
-    return (render(common.wikiname, '<h2 class="text-primary">主页</h2>' + html));
+    return (await render(common.wikiname, '<h2 class="text-primary">主页</h2>' + html,auth));
 }
 
-export default { save, show, edit, list, get, showHelp, showHome };
+export default { save, show, edit, list, get, showHelp, showHome,createpage };
 
 function markdown(code: string): string {
     return new showdown.Converter().makeHtml(wiki2md(code));
@@ -118,15 +123,22 @@ function editHTML(name: string, content: string): string {
 `;
 }
 
-
-function datenow(): string {
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = ('0' + (now.getMonth() + 1)).slice(-2);
-    const day = ('0' + now.getDate()).slice(-2);
-    const hour = ('0' + now.getHours()).slice(-2);
-    const minute = ('0' + now.getMinutes()).slice(-2);
-    const second = ('0' + now.getSeconds()).slice(-2);
-    return `${year}-${month}-${day} ${hour}:${minute}:${second}`;
-
+async function createpage(auth?:string){
+    //一个输入框，一个按钮
+    //输入框输入页面名，点击按钮创建页面
+    //创建页面后，跳转到编辑页面
+    //创建页面前，检查是否已经存在
+    const html =`
+    <div class="input-group mb-3">
+        <form method="post" action="/api/v1/createpage">
+            <div class="form-group">
+                <input type="text" name="pagename" class="form-control" placeholder="页面名" aria-label="页面名" aria-describedby="button-addon2">
+            </div>
+            <div class="input-group-append">
+                <button type="submit" class="btn btn-primary">创建</button>
+            </div>
+        </form>
+    </div>
+    `
+    return await render(common.wikiname + ' - 创建页面', html,auth);
 }
