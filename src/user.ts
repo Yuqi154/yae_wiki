@@ -58,7 +58,7 @@ async function getusername(userhash:string){
 
 async function saveUser(username:string,password:string){
     let userhash = SHA256(username+password).toString();
-    USERS_INDEX.put(username,userhash );
+    USERS_INDEX.put(username,userhash);
     //console.log(userhash)
     let userjson = createuserjson();
     userjson.username = username;
@@ -154,7 +154,7 @@ async function updatelogintime(userhash:string){
     }
     let user= JSON.parse(userjson);
     user.userlastlogin = new Date().toString();
-    USERS.put(userhash,JSON.stringify(userjson));
+    await USERS.put(userhash,JSON.stringify(user));
     return null;
 }
 
