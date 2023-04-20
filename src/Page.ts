@@ -67,11 +67,17 @@ async function showHelp(auth?:string): Promise<string> {
     return (await render(common.wikiname + ' - 帮助', '<h2 class="text-primary">帮助</h2>' + html,auth));
 }
 
-async function showHome(login: boolean,user:string,auth?:string): Promise<string> {
+async function showHome(login: boolean,auth?:string): Promise<string> {
     let html = "";
+    let users = "";
+    if (auth==undefined){
+        login = false;
+    }else{
+        users = await user.getusername(auth);
+    }
     if (login == true) {
         html = markdown(`
-### ${user},欢迎来到八重wiki
+### ${users},欢迎来到八重wiki
 ###您已经登录，可以编辑和[创建页面](/control/createpage)
 `);
     } else {

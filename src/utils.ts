@@ -1,3 +1,5 @@
+import user from "./user";
+
 function datenow(now:Date): string {
     const year = now.getFullYear();
     const month = ('0' + (now.getMonth() + 1)).slice(-2);
@@ -9,7 +11,7 @@ function datenow(now:Date): string {
 
 }
 
-export default { datenow,createcontentjson };
+export default { datenow,createcontentjson,getauth };
 
 
 function createcontentjson(){
@@ -20,4 +22,15 @@ function createcontentjson(){
         "contentuser":"contentuser",
     }
     return contentjson;
+}
+
+
+function getauth(cookiestr:string|undefined){
+  if (cookiestr == null) {
+  } else if (cookiestr.indexOf("auth") == -1) {
+  } else {
+    const auth = user.getCookie("auth", cookiestr)
+    return auth;
+  }
+  return undefined;
 }

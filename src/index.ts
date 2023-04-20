@@ -7,6 +7,7 @@ import login from './login';
 import wikiSearch, { searchWords } from './wikiSearch';
 import user from './user';
 import { common, loginc } from './config';
+import utils from './utils';
 
 
 
@@ -18,69 +19,36 @@ app.get('/', (ctx) => {
 });
 
 app.get('/control/createpage', async (ctx) => {
-  const cookiestr = ctx.req.headers.get("cookie")?.toString();
-  if (cookiestr == null) {
-  } else if (cookiestr.indexOf("auth") == -1) {
-  } else {
-    const auth = user.getCookie("auth", cookiestr)
-    return ctx.html(await Page.createpage(auth));
-  }
-  return ctx.html(await Page.createpage());
+  const auth = utils.getauth(ctx.req.headers.get("cookie")?.toString());
+  return ctx.html(await Page.createpage(auth));
 })
 
 app.get('/help', async (ctx) => {
-  const cookiestr = ctx.req.headers.get("cookie")?.toString();
-  if (cookiestr == null) {
-  } else if (cookiestr.indexOf("auth") == -1) {
-  } else {
-    const auth = user.getCookie("auth", cookiestr)
-    return ctx.html(await Page.showHelp(auth));
-  }
-  return ctx.html(await Page.showHelp());
+  const auth = utils.getauth(ctx.req.headers.get("cookie")?.toString());
+  return ctx.html(await Page.showHelp(auth));
 })
 
 app.get('/user/login', async (ctx) => {
-  const cookiestr = ctx.req.headers.get("cookie")?.toString();
-  if (cookiestr == null) {
-  } else if (cookiestr.indexOf("auth") == -1) {
-  } else {
-    const auth = user.getCookie("auth", cookiestr)
-    return ctx.html(await login.showpage(auth));
-  }
-  return ctx.html(await login.showpage());
+  const auth = utils.getauth(ctx.req.headers.get("cookie")?.toString());
+  return ctx.html(await login.showpage(auth));
 })
 
 app.get('/user/signup', async (ctx) => {
-  const cookiestr = ctx.req.headers.get("cookie")?.toString();
-  if (cookiestr == null) {
-  } else if (cookiestr.indexOf("auth") == -1) {
-  } else if (loginc.allowregister) {
-    const auth = user.getCookie("auth", cookiestr)
-    return ctx.html(await login.signuppage(auth));
-  } else {
-    return ctx.html('<h5 class="text-primary">注册功能已关闭</h5>');
-  }
+  const auth = utils.getauth(ctx.req.headers.get("cookie")?.toString());
   if (loginc.allowregister) {
-    return ctx.html(await login.signuppage());
+    return ctx.html(await login.signuppage(auth));
   } else {
     return ctx.html('<h5 class="text-primary">注册功能已关闭</h5>');
   }
 })
 
 app.get('/home', async (ctx) => {
-  const cookiestr = ctx.req.headers.get("cookie")?.toString();
   let login = true;
-  let username = "";
-  if (cookiestr == null) {
-    login = false;
-  } else if (cookiestr.indexOf("auth") == -1) {
-    login = false;
-  } else {
-    const auth = user.getCookie("auth", cookiestr)
-    username = await user.getusername(auth);
-    return ctx.html(await Page.showHome(login, username, auth));
+  const auth = utils.getauth(ctx.req.headers.get("cookie")?.toString());
+  if (auth != undefined) {  
+    return ctx.html(await Page.showHome(login, auth));
   }
-  return ctx.html(await Page.showHome(login, username));
+  return ctx.html(await Page.showHome(login));
 })
 
 app.get('/user', (ctx) => {
@@ -88,15 +56,10 @@ app.get('/user', (ctx) => {
 })
 
 app.get('/user/dashboard', async (ctx) => {
-  const cookiestr = ctx.req.headers.get("cookie")?.toString();
+  const auth = utils.getauth(ctx.req.headers.get("cookie")?.toString());
   let login = true;
-  let auth=""
-  if (cookiestr == null) {
-    login = false;
-  } else if (cookiestr.indexOf("auth") == -1) {
-    login = false;
-  } else {
-    auth = user.getCookie("auth", cookiestr)
+  if (auth == undefined) {
+    return ctx.redirect('/user/login');
   }
   if (login){
     return ctx.html(await user.showUser(auth));
@@ -108,14 +71,8 @@ app.get('/user/dashboard', async (ctx) => {
 app.get('/index', async (ctx) => {
   const pageNames = await Page.list();
   const htmlList = listGroup(pageNames.map((name) => link(name)));
-  const cookiestr = ctx.req.headers.get("cookie")?.toString();
-  if (cookiestr == null) {
-  } else if (cookiestr.indexOf("auth") == -1) {
-  } else {
-    const auth = user.getCookie("auth", cookiestr)
-    return ctx.html(await render(common.wikiname + '-所有内容', `<h2 class="text-primary">所有内容</h2>${htmlList}`, auth));
-  }
-  return ctx.html(await render(common.wikiname + '-所有内容', `<h2 class="text-primary">所有内容</h2>${htmlList}`));
+  const auth = utils.getauth(ctx.req.headers.get("cookie")?.toString());
+  return ctx.html(await render(common.wikiname + '-所有内容', `<h2 class="text-primary">所有内容</h2>${htmlList}`, auth));
 })
 
 app.get('/search', async (ctx) => {
@@ -125,28 +82,15 @@ app.get('/search', async (ctx) => {
   if (0 < hits.length) {
     html = listGroup(hits.map((pageName) => link(pageName)));
   }
-  const cookiestr = ctx.req.headers.get("cookie")?.toString();
-  if (cookiestr == null) {
-  } else if (cookiestr.indexOf("auth") == -1) {
-  } else {
-    const auth = user.getCookie("auth", cookiestr)
-    return ctx.html(await render(common.wikiname + '-搜索结果', `<h2 class="text-primary">搜索结果 (${query})</h2>${html}`, auth));
-  }
-  return ctx.html(await render(common.wikiname + '-搜索结果', `<h2 class="text-primary">搜索结果 (${query})</h2>${html}`));
+  const auth = utils.getauth(ctx.req.headers.get("cookie")?.toString());
+  return ctx.html(await render(common.wikiname + '-搜索结果', `<h2 class="text-primary">搜索结果 (${query})</h2>${html}`, auth));
 })
 
 app.get('/:pageName', async (ctx) => {
   const pageName = decodeURIComponent(ctx.req.param('pageName'));
   const edit = ctx.req.query().hasOwnProperty('edit');
-  const cookiestr = ctx.req.headers.get("cookie")?.toString();
-  let html=""
-  if (cookiestr == null) {
-  } else if (cookiestr.indexOf("auth") == -1) {
-  } else {
-    const auth = user.getCookie("auth", cookiestr)
-    html = await (edit ? Page.edit(pageName,auth) : Page.show(pageName,auth))
-  }
-  html = await (edit ? Page.edit(pageName) : Page.show(pageName))
+  const auth = utils.getauth(ctx.req.headers.get("cookie")?.toString());
+  const html = await (edit ? Page.edit(pageName,auth) : Page.show(pageName,auth))
   return ctx.html(html);
 });
 
@@ -206,13 +150,10 @@ app.post('/api/v1/createpage', bodyParse(), (ctx) => {
 
 app.post('/:pageName', bodyParse(), async (ctx) => {
   const pageName = decodeURIComponent(ctx.req.param('pageName'));
-  const cookiestr = ctx.req.headers.get("cookie")?.toString();
-  if (cookiestr == null) {
-    return ctx.text('请先登录', 401);
-  } else if (cookiestr.indexOf("auth") == -1) {
-    return ctx.text('请先登录', 401);
+  const auth = utils.getauth(ctx.req.headers.get("cookie")?.toString());
+  if (auth == undefined) {
+    return ctx.text('未登录', 401);
   }
-  const auth = user.getCookie("auth", cookiestr)
   const result = await user.checkauth(auth);
   if (!result) {
     return ctx.text('凭证错误' + result, 401);
