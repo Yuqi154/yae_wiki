@@ -142,10 +142,27 @@ app.post('/user/signup', bodyParse(), async (ctx) => {
 });
 
 
-app.post('/api/v1/createpage', bodyParse(), (ctx) => {
-  const { pagename } = ctx.req.parsedBody;
-  console.log(pagename);
-  return ctx.redirect("/" + pagename)
+app.post('/api/v1/createpage', bodyParse(), async (ctx) => {
+  const { pagename,apikey } = ctx.req.parsedBody;
+  if (apikey == undefined){
+    const auth = utils.getauth(ctx.req.headers.get("cookie")?.toString());
+    if (auth == undefined) {
+      return ctx.json({status:401,message:"未登录"});
+    }
+    const result = await user.checkauth(auth);
+    if (!result) {
+      return ctx.json({status:401,message:"凭证错误"});
+    }    
+    Page.save(pagename,"",auth);
+    return ctx.redirect("/" + pagename)
+  }else{
+    const result = await user.checkauth(apikey);
+    if (!result) {
+      return ctx.json({status:401,message:"凭证错误"});
+    }
+    Page.save(pagename,"",apikey);
+    return ctx.json({status:200,message:"success"});
+  }
 });
 
 app.post('/:pageName', bodyParse(), async (ctx) => {

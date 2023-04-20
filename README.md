@@ -19,7 +19,6 @@ You need npm and a Cloudflare account (free).
    您需要一个cloudflare帐户，
 <https://dash.cloudflare.com/sign-up/workers>
 
-
 1. login to cloudflare
 
    登录到cloudflare
