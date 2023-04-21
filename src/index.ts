@@ -8,7 +8,7 @@ import wikiSearch, { searchWords } from './wikiSearch';
 import user from './user';
 import { common, loginc } from './config';
 import utils from './utils';
-
+import history from './history';
 
 
 
@@ -86,6 +86,27 @@ app.get('/search', async (ctx) => {
   return ctx.html(await render(common.wikiname + '-搜索结果', `<h2 class="text-primary">搜索结果 (${query})</h2>${html}`, auth));
 })
 
+app.get('/:pageName/history', async (ctx) => {
+  const pageName = decodeURIComponent(ctx.req.param('pageName'));
+  const auth = utils.getauth(ctx.req.headers.get("cookie")?.toString());
+  const list = await history.list(pageName);
+  /*
+  //删除最后一个元素，因为最后一个元素是当前版本
+  list.shorthash.pop();
+  list.time.pop();
+  list.editer.pop();*/
+  const htmlList = listGroup(list.shorthash.map((name,index) => link("history/"+name, list.shorthash[index],"\t编辑时间: "+list.time[index]+"\t编辑者: "+list.editer[index],"版本哈希: ")));
+  return ctx.html(await render(common.wikiname + '-历史编辑记录', `<h2 class="text-primary">历史编辑记录</h2>${htmlList}`, auth));
+});
+
+app.get('/:pageName/history/:hash', async (ctx) => {
+  const pageName = decodeURIComponent(ctx.req.param('pageName'));
+  const hash = decodeURIComponent(ctx.req.param('hash'));
+  const auth = utils.getauth(ctx.req.headers.get("cookie")?.toString());
+  const html = await history.showHistory(pageName,hash,auth);
+  return ctx.html(html);
+});
+
 app.get('/:pageName', async (ctx) => {
   const pageName = decodeURIComponent(ctx.req.param('pageName'));
   const edit = ctx.req.query().hasOwnProperty('edit');
@@ -147,21 +168,38 @@ app.post('/api/v1/createpage', bodyParse(), async (ctx) => {
   if (apikey == undefined){
     const auth = utils.getauth(ctx.req.headers.get("cookie")?.toString());
     if (auth == undefined) {
-      return ctx.json({status:401,message:"未登录"});
+      return ctx.text("未登录");
     }
     const result = await user.checkauth(auth);
     if (!result) {
-      return ctx.json({status:401,message:"凭证错误"});
+      return ctx.text("凭证错误");
     }    
-    Page.save(pagename,"",auth);
+    await Page.save(pagename,"页面创建成功",auth);
     return ctx.redirect("/" + pagename)
   }else{
     const result = await user.checkauth(apikey);
     if (!result) {
       return ctx.json({status:401,message:"凭证错误"});
     }
-    Page.save(pagename,"",apikey);
+    await Page.save(pagename,"页面创建成功",apikey);
     return ctx.json({status:200,message:"success"});
+  }
+});
+
+app.post('/api/v1/deletepage', bodyParse(), async (ctx) => {
+  const { pagename,apikey } = ctx.req.parsedBody;
+  if (apikey == undefined){
+    return ctx.text("请使用api访问");
+  }else{
+    const result = await user.checkauth(apikey);
+    if (!result) {
+      return ctx.json({status:401,message:"凭证错误"});
+    }
+    if (await Page.deletepage(pagename,apikey)){
+      return ctx.json({status:200,message:"success"});
+    }else{
+      return ctx.json({status:401,message:"凭证错误"});
+    }
   }
 });
 

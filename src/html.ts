@@ -93,8 +93,8 @@ async function navbar(pagename?: string, auth?: string) {
 </nav>`;
 }
 
-export function link(href: string, text?: string): string {
-  return `<a href="${href}">${text ? text : href}</a>`;
+export function link(href: string, text?: string,meta?:string,fore?:string): string {
+  return `<span>${fore?fore:""}</span><a href="${href}">${text ? text : href}</a><span>${meta?meta:""}</span>`;
 }
 
 export function listGroup(stuff: string[]): string {

@@ -1,6 +1,6 @@
 name = "yae-wiki"
 main = "src/index.ts"
-compatibility_date = "2023-04-14"
+compatibility_date = "2023-04-21"
 
 # id (for production) is a required field, but you can set it to the same as
 # preview_id until you need to separate them
@@ -8,9 +8,7 @@ kv_namespaces = [
   { binding = "PAGES", id = "42eb5e79efee488bbfff5573ced04228", preview_id = "7a6f18999e454f12852b94b4a4741c2c" },
   { binding = "PAGE_INDEX", id = "62985f2abd734ad39ca51f6979cf6abd", preview_id = "088a9f7b6f85489196c5f08bf13cff7c" },
   { binding = "USERS", id = "2c64d760e3b642a59fdc930ff9f746fc", preview_id ="5a729fca96d94b9c9a82bc888aefae97"},
-  {binding = "USERS_INDEX",id = "72e8dbc3b7c6401ea4a3c8cf0b749958",preview_id = "8329e1e3417b4efb90131a62318d3fdb"}
+  { binding = "USERS_INDEX",id = "72e8dbc3b7c6401ea4a3c8cf0b749958",preview_id = "8329e1e3417b4efb90131a62318d3fdb"},
+  { binding = "PAGE_HISTORY", id = "382b01b84bba4a7c8ea66b517208ebfd", preview_id = "2d111f05bd0446f18a24242e67d80d7a" }
 ]
 
-# [secrets]
-# BASICAUTH_USERNAME
-# BASICAUTH_PASSWORD

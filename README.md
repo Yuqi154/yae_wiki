@@ -25,9 +25,9 @@ You need npm and a Cloudflare account (free).
 
    `wrangler login`
 
-1. Create a PAGES , a PAGE_INDEX KV and an USER namespace through wrangler:
+1. Create namespace through wrangler:
 
-   通过wrangler创建一个PAGES，一个PAGE_INDEX KV和一个USER命名空间：
+   通过wrangler创建命名空间：
 
    `wrangler kv:namespace create "PAGES"`
 
@@ -36,6 +36,10 @@ You need npm and a Cloudflare account (free).
    `wrangler kv:namespace create "USERS"`
 
    `wrangler kv:namespace create "USERS_INDEX"`
+
+   `wrangler kv:namespace create "PAGE_HISTORY"`
+
+   `wrangler kv:namespace create "COMMON"`
 
 1. Edit [wrangler.toml](./wrangler.toml) to insert your KV space ids
 

@@ -7,6 +7,8 @@ import user from './user';
 
 // see wrangler.toml
 declare const PAGES: KVNamespace;
+declare const PAGE_HISTORY: KVNamespace;
+import history from './history';
 
 async function save(name: string, content: string, auth: string): Promise<string> {
     //将内容，时间，用户合并成一个json字符串
@@ -15,44 +17,69 @@ async function save(name: string, content: string, auth: string): Promise<string
     contentjson.content = content;
     contentjson.contenttime = utils.datenow(new Date);
     contentjson.contentuser = auth;
-    await PAGES.put(name, JSON.stringify(contentjson));
+    const hash = await history.saveHistory(content,name)
+    await PAGES.put(hash, JSON.stringify(contentjson));
     
     return render(name, showHTML(name, content, username, utils.datenow(new Date)), name);
 }
 
+async function deletepage(name: string,auth:string): Promise<boolean> {
+    if (auth != common.adminauth) {
+        return false;
+    }
+    await PAGES.delete(name);
+    return true
+}
+    
+
+
 async function edit(name: string,auth?:string): Promise<string> {
-    const { content } = await get(name);
+    const { content ,err} = await get(name);
+    if (err != "") {
+        return render(common.wikiname+"找不到页面",'<h2 class="text-primary">404 没有所指向的页面</h2>',auth, name);
+    }
     return render(name, editHTML(name, content),auth, name);
 }
 
 async function show(name: string,auth?:string): Promise<string> {
-    const content = await PAGES.get(name);
-    if (content === null) {
-        return render(name, editHTML(name, ''),auth, name);
-    }
     //解析json字符串
+    const historyd = await history.getHistory(name);
+    if (historyd === null) {
+        return render(common.wikiname+"找不到页面",'<h2 class="text-primary">404 没有所指向的页面</h2>',auth, name);
+    }
+    const historyjson = JSON.parse(historyd);
+    //获取最新的历史记录
+    const content = await PAGES.get(historyjson.history[historyjson.history.length-1]);
+    if (content === null) {
+        return render(common.wikiname+"找不到页面",'<h2 class="text-primary">404 没有所指向的页面</h2>',auth, name);
+    }
     let contentjson = JSON.parse(content);
     let html = "";
     try {
         let username= await user.getusername(contentjson.contentuser);
         html = showHTML(name, contentjson.content, username, contentjson.contenttime);
     }catch{
-        return render(name, editHTML(name, ''),auth, name);
+        return render(common.wikiname+"找不到页面",'<h2 class="text-primary">404 没有所指向的页面</h2>',auth, name);
     }
     return render(name, html,auth, name)
 }
 
 async function list(): Promise<string[]> {
-    return (await PAGES.list()).keys.map(k => k.name);
+    return (await PAGE_HISTORY.list()).keys.map(k => k.name);
 }
 
-async function get(name: string): Promise<{ name: string, content: string }> {
-    const contentjson = (await PAGES.get(name));
+async function get(name: string): Promise<{ name: string, content: string ,err:string}> {
+    const historyd = await history.getHistory(name);
+    if (historyd === null) {
+        return { name, content: '',err: 'not found'};
+    };
+    const historyjson = JSON.parse(historyd);
+    const contentjson = await PAGES.get(historyjson.history[historyjson.history.length-1]);
     if (contentjson === null) {
-        return { name, content: '' };
+        return { name, content: '',err: 'not found' };
     }
     let content = JSON.parse(contentjson).content;
-    return { name, content };
+    return { name, content ,err: ''};
 }
 
 async function showHelp(auth?:string): Promise<string> {
@@ -88,7 +115,9 @@ async function showHome(login: boolean,auth?:string): Promise<string> {
     return (await render(common.wikiname, '<h2 class="text-primary">主页</h2>' + html,auth));
 }
 
-export default { save, show, edit, list, get, showHelp, showHome,createpage };
+export default { save, show, edit, list, get, showHelp, showHome,createpage,deletepage };
+
+export const extra={showHTML};
 
 function markdown(code: string): string {
     return new showdown.Converter().makeHtml(wiki2md(code));
@@ -104,6 +133,7 @@ function showHTML(name: string, content: string, user: string, time: string): st
 <h1 class="text-primary">${name}</h1>
 ${markdown(content)}
 <p>上次编辑：${time} 用户：${user}</p>
+<a href="${name}/history">历史编辑</a>
 
 `
     } catch (e) {
