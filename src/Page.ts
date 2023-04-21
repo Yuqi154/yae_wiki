@@ -133,7 +133,7 @@ function showHTML(name: string, content: string, user: string, time: string): st
 <h1 class="text-primary">${name}</h1>
 ${markdown(content)}
 <p>上次编辑：${time} 用户：${user}</p>
-<a href="${name}/history">历史编辑</a>
+<a href="/${name}/history">历史编辑</a>
 
 `
     } catch (e) {
