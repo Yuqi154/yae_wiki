@@ -64,4 +64,4 @@ You need npm and a Cloudflare account (free).
 - [ ] user profile
 - [ ] user settings
 - [ ] email verification
-- [ ] edit history
+- [x] edit history
