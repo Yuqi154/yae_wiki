@@ -168,18 +168,24 @@ app.post('/api/v1/createpage', bodyParse(), async (ctx) => {
   if (apikey == undefined){
     const auth = utils.getauth(ctx.req.headers.get("cookie")?.toString());
     if (auth == undefined) {
-      return ctx.text("未登录");
+      return ctx.html(await render(common.wikiname + '-登录', `<h2 class="text-primary">未登录</h2><a href="/user/login">前往登录</a>`), 401)
     }
     const result = await user.checkauth(auth);
     if (!result) {
-      return ctx.text("凭证错误");
-    }    
+      return ctx.html(await render(common.wikiname + '-登录', `<h2 class="text-primary">登录已过期</h2><a href="/user/login">前往登录</a>`), 401);
+    }
+    if (await Page.checkpage(pagename)){
+      return ctx.html(await render(common.wikiname + '-页面已存在', `<h2 class="text-primary">页面已存在</h2><a href="/${pagename}">前往页面</a>`, auth));
+    }
     await Page.save(pagename,"页面创建成功",auth);
     return ctx.redirect("/" + pagename)
   }else{
     const result = await user.checkauth(apikey);
     if (!result) {
       return ctx.json({status:401,message:"凭证错误"});
+    }
+    if (await Page.checkpage(pagename)){
+      return ctx.json({status:401,message:"页面已存在"});
     }
     await Page.save(pagename,"页面创建成功",apikey);
     return ctx.json({status:200,message:"success"});

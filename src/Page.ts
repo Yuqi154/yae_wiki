@@ -89,7 +89,7 @@ async function showHelp(auth?:string): Promise<string> {
 您可以编辑任何页面。页面以[Markdown](https://markdown.com.cn/)书写
 这个页面内部的链接有额外的语法（就像在维基百科上一样，双方括号中的单词是维基链接）。
 
-通过访问它们来创建新页面，也许可以先创建一个指向它们的链接。
+创建新页面需要登录，注册是免费的，只需要用户名和密码即可。
 `);
     return (await render(common.wikiname + ' - 帮助', '<h2 class="text-primary">帮助</h2>' + html,auth));
 }
@@ -115,7 +115,7 @@ async function showHome(login: boolean,auth?:string): Promise<string> {
     return (await render(common.wikiname, '<h2 class="text-primary">主页</h2>' + html,auth));
 }
 
-export default { save, show, edit, list, get, showHelp, showHome,createpage,deletepage };
+export default { save, show, edit, list, get, showHelp, showHome,createpage,deletepage,checkpage };
 
 export const extra={showHTML};
 
@@ -177,4 +177,12 @@ async function createpage(auth?:string){
     </div>
     `
     return await render(common.wikiname + ' - 创建页面', html,auth);
+}
+
+async function checkpage(name:string){
+    const historyd = await history.getHistory(name);
+    if (historyd === null) {
+        return false;
+    }
+    return true;
 }
