@@ -6,7 +6,7 @@ import Page from './Page';
 import login from './login';
 import wikiSearch, { searchWords } from './wikiSearch';
 import user from './user';
-import { common, loginc } from './config';
+import { common, loginc, wp } from './config';
 import utils from './utils';
 import history from './history';
 
@@ -87,6 +87,9 @@ app.get('/search', async (ctx) => {
 })
 
 app.get('/:pageName/history', async (ctx) => {
+  if (!wp.allowhistory) {
+    return ctx.html('<h5 class="text-primary">历史记录功能已关闭</h5>');
+  }
   const pageName = decodeURIComponent(ctx.req.param('pageName'));
   const auth = utils.getauth(ctx.req.headers.get("cookie")?.toString());
   const list = await history.list(pageName);
@@ -100,6 +103,9 @@ app.get('/:pageName/history', async (ctx) => {
 });
 
 app.get('/:pageName/history/:hash', async (ctx) => {
+  if (!wp.allowhistory) {
+    return ctx.html('<h5 class="text-primary">历史记录功能已关闭</h5>');
+  }
   const pageName = decodeURIComponent(ctx.req.param('pageName'));
   const hash = decodeURIComponent(ctx.req.param('hash'));
   const auth = utils.getauth(ctx.req.headers.get("cookie")?.toString());

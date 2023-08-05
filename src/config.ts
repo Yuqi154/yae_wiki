@@ -15,3 +15,7 @@ export const loginc = {
         qq: false
     }
 };
+
+export const wp = {
+    allowhistory: true,
+};
