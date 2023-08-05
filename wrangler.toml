@@ -1,6 +1,6 @@
 name = "yae-wiki"
 main = "src/index.ts"
-compatibility_date = "2023-04-21"
+compatibility_date = "2023-08-05"
 
 # id (for production) is a required field, but you can set it to the same as
 # preview_id until you need to separate them
@@ -11,4 +11,4 @@ kv_namespaces = [
   { binding = "USERS_INDEX",id = "72e8dbc3b7c6401ea4a3c8cf0b749958",preview_id = "8329e1e3417b4efb90131a62318d3fdb"},
   { binding = "PAGE_HISTORY", id = "382b01b84bba4a7c8ea66b517208ebfd", preview_id = "2d111f05bd0446f18a24242e67d80d7a" }
 ]
-
+#you should replace the above ids with your own
